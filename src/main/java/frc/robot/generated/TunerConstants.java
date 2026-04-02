@@ -180,9 +180,9 @@ public class TunerConstants {
     // 2 YENİ TALON FX
     public static final class CustomMechanismConstants {
 
-        public static final int kLeftTalonId = 16;
-        public static final int kRightTalonId = 17;
-        public static final int kTopSparkId = 6;
+        // public static final int kLeftTalonId = 16;
+        // public static final int kRightTalonId = 17;
+        public static final int kTopSparkId = 4;
         public static final int kBottomSparkId = 22;
 
         // Talon FX Ortak Konfigürasyonu
@@ -194,7 +194,7 @@ public class TunerConstants {
                         .withNeutralMode(NeutralModeValue.Brake));
 
         // Hız Değerleri
-        public static final double kTalonSpeed = 0.2;
-        public static final double kSparkSpeed = 0.2;
+        // public static final double kTalonSpeed = 0.05;
+        public static final double kSparkSpeed = 0.05;
     }
 }
