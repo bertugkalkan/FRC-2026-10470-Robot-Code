@@ -1,4 +1,4 @@
-package frc.robot.generated;
+package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -285,25 +285,6 @@ public class TunerConstants {
         
     }
 
-    // 2 YENİ TALON FX
-    public static final class CustomMechanismConstants {
 
-        // public static final int kLeftTalonId = 16;
-        // public static final int kRightTalonId = 17;
-        public static final int kTopSparkId = 1;
-        public static final int kBottomSparkId = 22;
-
-        // Talon FX Ortak Konfigürasyonu
-        public static final TalonFXConfiguration CustomTalonConfigs = new TalonFXConfiguration()
-                .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withStatorCurrentLimit(Amps.of(40))
-                        .withStatorCurrentLimitEnable(true))
-                .withMotorOutput(new MotorOutputConfigs()
-                        .withNeutralMode(NeutralModeValue.Brake));
-
-        // Hız Değerleri
-        // public static final double kTalonSpeed = 0.05;
-        public static final double kSparkSpeed = 0.3;    
-}
 }
 
