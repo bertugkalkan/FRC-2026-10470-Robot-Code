@@ -5,8 +5,10 @@ import frc.robot.subsystems.IntakeSubsystem;
 
 public class IntakeSubsystemCommand extends Command {
     private final IntakeSubsystem intakeSubsystem;
-    private final double TARGET_ANGLE_ROTATIONS = 120.0 / 360.0; // 120 dereceyi tura çevirdik
-    private final double TOLERANCE = 0.02; // Hedefe ne kadar yaklaştığımızda "açık" sayalım?
+    
+    // Hedefleri doğrudan derece cinsinden yazıyoruz (Okuması çok daha kolay)
+    private final double TARGET_ANGLE = 120; 
+    private final double TOLERANCE = 5.0; // Hedefe 5 derece yaklaşıldığında Kraken başlasın
 
     public IntakeSubsystemCommand(IntakeSubsystem subsystem) {
         this.intakeSubsystem = subsystem;
@@ -15,23 +17,21 @@ public class IntakeSubsystemCommand extends Command {
 
     @Override
     public void initialize() {
-        double currentPos = intakeSubsystem.getRevMotorPosition();
-        
-        if (Math.abs(currentPos - TARGET_ANGLE_ROTATIONS) > TOLERANCE) {
-            intakeSubsystem.drivetoAngle(120);
-        }
+        // Hedefe 120 dereceye git komutunu ver
+        intakeSubsystem.drivetoAngle(TARGET_ANGLE);
     }
 
     @Override
     public void execute() {
-        // REV motoru hedef açıya (120 derece) ulaştı mı?
-        double currentPos = intakeSubsystem.getRevMotorPosition();
+        // Mekanizmanın o anki gerçek açısını çek
+        double currentAngle = intakeSubsystem.getIntakeAngle();
         
-        if (Math.abs(currentPos - TARGET_ANGLE_ROTATIONS) < TOLERANCE) {
-            // Eğer hedef açıdaysak Kraken motorunu çalıştır
+        // Eğer mevcut açı, 120 hedefine 5 derece kadar yaklaştıysa (115 ile 125 arası)
+        if (Math.abs(currentAngle - TARGET_ANGLE) < TOLERANCE) {
+            // Intake açıldı, içeri top alma/verme motorunu çalıştır
             intakeSubsystem.runKrakenMotor(0.5);
         } else {
-            // Hedef açıya henüz ulaşılmadıysa Kraken'i güvenlik için durdur veya çalıştırma
+            // Hedefe henüz varılmadı, güvenlik için bekle
             intakeSubsystem.runKrakenMotor(0);
         }
     }

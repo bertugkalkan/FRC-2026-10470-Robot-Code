@@ -21,11 +21,12 @@ public class IntakeSubsystem extends SubsystemBase {
     private final SparkMax IntakeMotor;
     private final SparkMax SpinDexeMotor1;
     private final SparkMax SpinDexeMotor2;
+    private final SparkMax ConveyorMotor;
     private final TalonFX KrakenMotor;
     private final SparkMax IndexerMotor;
     private final SparkClosedLoopController revClosedLoopController;
 
-    private final double GEAR_RATIO = 25.0; 
+    private final double GEAR_RATIO = 80.0; 
 
     public IntakeSubsystem() {
         IntakeMotor = new SparkMax(GeneralConstants.IntakeMechanismConstants.kIntakeRotateMotorId, MotorType.kBrushless);
@@ -33,7 +34,7 @@ public class IntakeSubsystem extends SubsystemBase {
         SpinDexeMotor1 = new SparkMax(GeneralConstants.IntakeMechanismConstants.kSpinDexeMotor1Id, MotorType.kBrushless);
         SpinDexeMotor2 = new SparkMax(GeneralConstants.IntakeMechanismConstants.kSpinDexeMotor2Id, MotorType.kBrushless);
         IndexerMotor = new SparkMax(GeneralConstants.IntakeMechanismConstants.kIndexerMotorId, MotorType.kBrushless);
-
+        ConveyorMotor = new SparkMax(GeneralConstants.IntakeMechanismConstants.kConveyorMotorId, MotorType.kBrushless);
         revClosedLoopController = IntakeMotor.getClosedLoopController();
 
         SparkMaxConfig revConfig = new SparkMaxConfig();        
@@ -41,7 +42,7 @@ public class IntakeSubsystem extends SubsystemBase {
         revConfig
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(40)
-            .inverted(true);
+            .inverted(false);
 
         revConfig.closedLoop
             .pid(0.1, 0.0, 0.0) 
@@ -63,10 +64,17 @@ public class IntakeSubsystem extends SubsystemBase {
     public void EmptyStorage(){
         SpinDexeMotor1.set(-GeneralConstants.IntakeMechanismConstants.kSpinDexeSpeed);
         SpinDexeMotor2.set(GeneralConstants.IntakeMechanismConstants.kSpinDexeSpeed);
-        IndexerMotor.set(GeneralConstants.IntakeMechanismConstants.kIndexSpeed);
+        ConveyorMotor.set(-0.8);
+        IndexerMotor.set(-GeneralConstants.IntakeMechanismConstants.kIndexSpeed);
     }
     public double getRevMotorPosition() {
         return IntakeMotor.getEncoder().getPosition();
+    }
+
+    // IntakeSubsystem.java içine eklenecek
+    public double getIntakeAngle() {
+        // Motorun attığı turu dişli oranına bölüp 360 ile çarparak mekanizmanın gerçek açısını buluruz.
+        return (IntakeMotor.getEncoder().getPosition() / GEAR_RATIO) * 360.0;
     }
 
     public void stopMotors() {
@@ -75,5 +83,6 @@ public class IntakeSubsystem extends SubsystemBase {
         SpinDexeMotor1.stopMotor();
         SpinDexeMotor2.stopMotor();
         IndexerMotor.stopMotor();
+        ConveyorMotor.stopMotor();
     }
 }
