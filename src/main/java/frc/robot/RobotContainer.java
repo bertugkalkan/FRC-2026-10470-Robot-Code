@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.commands.IntakeSubsystemCommand;;
+import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.commands.IntakeSubsystemCommand;
+
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
@@ -38,6 +40,8 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+
+    public final VisionSubsystem visionSubsystem = new VisionSubsystem(drivetrain);
 
     public RobotContainer() {
         configureBindings();
@@ -76,6 +80,7 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         joystick.a().toggleOnTrue(new IntakeSubsystemCommand(intakeSubsystem));
+        joystick.b().toggleOnTrue(Commands.startEnd(intakeSubsystem::EmptyStorage, intakeSubsystem::stopMotors, intakeSubsystem));
         // Custom mechanism command binding (example)
         drivetrain.registerTelemetry(logger::telemeterize);
     }

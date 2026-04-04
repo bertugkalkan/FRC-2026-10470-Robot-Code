@@ -18,18 +18,23 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 public class IntakeSubsystem extends SubsystemBase {
 
-    private final SparkMax RevMotor;
+    private final SparkMax IntakeMotor;
+    private final SparkMax SpinDexeMotor1;
+    private final SparkMax SpinDexeMotor2;
     private final TalonFX KrakenMotor;
-    
+    private final SparkMax IndexerMotor;
     private final SparkClosedLoopController revClosedLoopController;
 
-    private final double GEAR_RATIO = 1.0; 
+    private final double GEAR_RATIO = 25.0; 
 
     public IntakeSubsystem() {
-        RevMotor = new SparkMax(GeneralConstants.IntakeMechanismConstants.kIntakeRotateMotorId, MotorType.kBrushless);
+        IntakeMotor = new SparkMax(GeneralConstants.IntakeMechanismConstants.kIntakeRotateMotorId, MotorType.kBrushless);
         KrakenMotor = new TalonFX(GeneralConstants.IntakeMechanismConstants.kIntakeMotorId, TunerConstants.kCANBus);
+        SpinDexeMotor1 = new SparkMax(GeneralConstants.IntakeMechanismConstants.kSpinDexeMotor1Id, MotorType.kBrushless);
+        SpinDexeMotor2 = new SparkMax(GeneralConstants.IntakeMechanismConstants.kSpinDexeMotor2Id, MotorType.kBrushless);
+        IndexerMotor = new SparkMax(GeneralConstants.IntakeMechanismConstants.kIndexerMotorId, MotorType.kBrushless);
 
-        revClosedLoopController = RevMotor.getClosedLoopController();
+        revClosedLoopController = IntakeMotor.getClosedLoopController();
 
         SparkMaxConfig revConfig = new SparkMaxConfig();        
         
@@ -39,10 +44,10 @@ public class IntakeSubsystem extends SubsystemBase {
             .inverted(true);
 
         revConfig.closedLoop
-            .pid(0.1, 0.2, 0.1) 
+            .pid(0.1, 0.0, 0.0) 
             .outputRange(-0.3, 0.3);
 
-        RevMotor.configure(revConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        IntakeMotor.configure(revConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void drivetoAngle(double angle) {
@@ -55,12 +60,20 @@ public class IntakeSubsystem extends SubsystemBase {
         KrakenMotor.set(speed);
     }
 
+    public void EmptyStorage(){
+        SpinDexeMotor1.set(-GeneralConstants.IntakeMechanismConstants.kSpinDexeSpeed);
+        SpinDexeMotor2.set(GeneralConstants.IntakeMechanismConstants.kSpinDexeSpeed);
+        IndexerMotor.set(GeneralConstants.IntakeMechanismConstants.kIndexSpeed);
+    }
     public double getRevMotorPosition() {
-        return RevMotor.getEncoder().getPosition();
+        return IntakeMotor.getEncoder().getPosition();
     }
 
     public void stopMotors() {
-        RevMotor.stopMotor();
+        IntakeMotor.stopMotor();
         KrakenMotor.stopMotor();
+        SpinDexeMotor1.stopMotor();
+        SpinDexeMotor2.stopMotor();
+        IndexerMotor.stopMotor();
     }
 }

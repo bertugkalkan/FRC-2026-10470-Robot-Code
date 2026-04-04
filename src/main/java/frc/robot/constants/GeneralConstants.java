@@ -12,6 +12,9 @@ public class GeneralConstants {
     public static final class IntakeMechanismConstants {
         public static final int kIntakeMotorId = 3;
         public static final int kIntakeRotateMotorId = 4;
+        public static final int kSpinDexeMotor1Id = 5;
+        public static final int kSpinDexeMotor2Id = 6;
+        public static final int kIndexerMotorId = 7;
 
         // Talon FX Ortak Konfigürasyonu
         public static final TalonFXConfiguration CustomTalonConfigs = new TalonFXConfiguration()
@@ -23,7 +26,9 @@ public class GeneralConstants {
 
         // Hız Değerleri
         // public static final double kTalonSpeed = 0.05;
-        public static final double kSparkSpeed = 0.3; 
+        public static final double kIntakeSpeed = 0.3;
+        public static final double kSpinDexeSpeed = -0.5;
+        public static final double kIndexSpeed = 0.5;
         public static final double kTalonSpeed = 0.5;   
 }
 }
