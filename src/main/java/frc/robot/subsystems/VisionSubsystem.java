@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.EstimatedRobotPose; // Yeni eklendi
+import edu.wpi.first.math.VecBuilder;
 
 import java.util.Optional;
 
@@ -66,30 +67,52 @@ public class VisionSubsystem extends SubsystemBase {
         field.setRobotPose(drivetrain.getState().Pose);
     }
 
-    /**
-     * YENİ API yapısına uygun Kamera Güncelleme Metodu
-     */
-    private void updatePhotonCamera(PhotonPoseEstimator estimator, PhotonCamera camera) {
-        // 1. Kameradan o anki çerçeveyi (sonucu) çek
+private void updatePhotonCamera(PhotonPoseEstimator estimator, PhotonCamera camera) {
         var result = camera.getLatestResult();
 
-        // 2. Çerçevede herhangi bir hedef var mı?
         if (result.hasTargets()) {
-            // 3. Stratejiyi direkt metot ismi olarak çağırıyoruz (Coprocessor'da Multi-Tag)
             Optional<EstimatedRobotPose> estPose = estimator.estimateCoprocMultiTagPose(result);
             
-            // Güvenlik (Fallback): Eğer sadece 1 etiket varsa MultiTag başarısız olur, 
-            // o yüzden tekli etiket stratejisi olan "Lowest Ambiguity" ile tekrar deneriz.
             if (estPose.isEmpty()) {
                 estPose = estimator.estimateLowestAmbiguityPose(result);
             }
 
-            // 4. Eğer elimizde geçerli bir konum tahmini varsa şaseye gönder
             estPose.ifPresent(estimatedRobotPose -> {
                 Pose2d pose = estimatedRobotPose.estimatedPose.toPose2d();
                 double timestamp = estimatedRobotPose.timestampSeconds;
                 
-                drivetrain.addVisionMeasurement(pose, timestamp);
+                // 1. Görülen hedeflerin robota olan ortalama uzaklığını hesapla
+                double avgDistance = 0;
+                for (var target : result.getTargets()) {
+                    avgDistance += target.getBestCameraToTarget().getTranslation().getNorm();
+                }
+                avgDistance /= result.getTargets().size();
+
+                // 2. Güven (Sapma) Çarpanlarını Belirle (Değerler büyüdükçe güven AZALIR)
+                double xyStdDev;
+                double thetaStdDev;
+
+                // Eğer birden fazla etiket görüyorsa (Multi-Tag), sistem çok daha güvenilirdir
+                if (result.getTargets().size() > 1) {
+                    // Uzaklığın karesiyle orantılı olarak sapmayı artır (örn: yakında 0.1, uzakta 0.5+)
+                    xyStdDev = 0.1 + (Math.pow(avgDistance, 2) * 0.05); 
+                    thetaStdDev = 0.1 + (Math.pow(avgDistance, 2) * 0.05);
+                } 
+                // Eğer tek etiket görüyorsa güveni ciddi şekilde düşür
+                else {
+                    // Güvenlik Önlemi: Tek etiket 4 metreden uzaksa bu veriyi tamamen reddet (Noise'u engeller)
+                    if (avgDistance > 4.0) {
+                        return; 
+                    }
+                    xyStdDev = 0.3 + (Math.pow(avgDistance, 2) * 0.1); 
+                    thetaStdDev = 0.5 + (Math.pow(avgDistance, 2) * 0.2);
+                }
+
+                // 3. Standart Sapma Matrisini Oluştur (X Metre, Y Metre, Radyan)
+                var visionMeasurementStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
+
+                // 4. Veriyi ve GÜVEN SKORUNU Swerve şaseye gönder
+                drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);
             });
         }
     }

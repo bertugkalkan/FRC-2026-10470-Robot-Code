@@ -7,7 +7,7 @@ public class IntakeSubsystemCommand extends Command {
     private final IntakeSubsystem intakeSubsystem;
     
     // Hedefleri doğrudan derece cinsinden yazıyoruz (Okuması çok daha kolay)
-    private final double TARGET_ANGLE = 120; 
+    private final double TARGET_ANGLE = 105; 
     private final double TOLERANCE = 5.0; // Hedefe 5 derece yaklaşıldığında Kraken başlasın
 
     public IntakeSubsystemCommand(IntakeSubsystem subsystem) {
