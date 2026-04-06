@@ -329,10 +329,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void configurePathPlanner() {
         RobotConfig config;
         try {
+            // PathPlanner bilgisayar arayüzündeki ayarları robota çeker
             config = RobotConfig.fromGUISettings();
         } catch (Exception e) {
-            e.printStackTrace();
-            return; 
+            edu.wpi.first.wpilibj.DriverStation.reportError("PATHPLANNER KURALAMADI: Ayar dosyasi bulunamadi! PathPlanner'dan ayarlari yapip DEPLOY atin.", true);
+            return;
         }
 
         AutoBuilder.configure(
@@ -341,8 +342,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             () -> this.getState().Speeds,
             (speeds, feedforwards) -> this.setControl(autoRequest.withSpeeds(speeds)),
             new PPHolonomicDriveController( // 5. Otonom sürüş PID ayarları
-                new PIDConstants(5.0, 0.0, 0.0), // İleri/Geri ve Sağ/Sol hassasiyeti
-                new PIDConstants(5.0, 0.0, 0.0)  // Dönüş (Pusula) hassasiyeti
+                new PIDConstants(2.0, 0.01, 0.01), // İleri/Geri ve Sağ/Sol hassasiyeti
+                new PIDConstants(2.0, 0.01, 0.01)  // Dönüş (Pusula) hassasiyeti
             ),
             config, // 6. Arayüzden çekilen fiziksel konfigürasyon
             () -> {

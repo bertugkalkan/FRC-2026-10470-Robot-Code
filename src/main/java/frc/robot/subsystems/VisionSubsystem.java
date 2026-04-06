@@ -27,9 +27,9 @@ public class VisionSubsystem extends SubsystemBase {
     private final PhotonCamera cam3 = new PhotonCamera("PhotonCam3");
 
     // Kameraların robotun merkezine göre konumları
-    private final Transform3d robotToCam1 = new Transform3d(new Translation3d(0.306, -0.34, 0.46), new Rotation3d(0, 0, 0));
-    private final Transform3d robotToCam2 = new Transform3d(new Translation3d(-0.105, 0.24, 0.69), new Rotation3d(0, 0, Math.PI)); 
-    private final Transform3d robotToCam3 = new Transform3d(new Translation3d(0.105, 0.245, 0.69), new Rotation3d(0, 0, -Math.PI / 2)); 
+    private final Transform3d robotToCam1 = new Transform3d(new Translation3d(0.306, 0.34, 0.456), new Rotation3d(0, 0, 0));
+    private final Transform3d robotToCam2 = new Transform3d(new Translation3d(0.105, -0.245, 0.69), new Rotation3d(0, 0, Math.PI)); 
+    private final Transform3d robotToCam3 = new Transform3d(new Translation3d(-0.105, -0.24, 0.69), new Rotation3d(0, 0, Math.PI / 2)); 
 
     // Her kamera için ayrı konum tahminleyicisi
     private final PhotonPoseEstimator estimator1;
@@ -95,8 +95,8 @@ private void updatePhotonCamera(PhotonPoseEstimator estimator, PhotonCamera came
                 // Eğer birden fazla etiket görüyorsa (Multi-Tag), sistem çok daha güvenilirdir
                 if (result.getTargets().size() > 1) {
                     // Uzaklığın karesiyle orantılı olarak sapmayı artır (örn: yakında 0.1, uzakta 0.5+)
-                    xyStdDev = 0.1 + (Math.pow(avgDistance, 2) * 0.05); 
-                    thetaStdDev = 0.1 + (Math.pow(avgDistance, 2) * 0.05);
+                    xyStdDev = 0.2 + (Math.pow(avgDistance, 2) * 0.05); 
+                    thetaStdDev = 0.8 + (Math.pow(avgDistance, 2) * 0.05);
                 } 
                 // Eğer tek etiket görüyorsa güveni ciddi şekilde düşür
                 else {
@@ -109,7 +109,7 @@ private void updatePhotonCamera(PhotonPoseEstimator estimator, PhotonCamera came
                 }
 
                 // 3. Standart Sapma Matrisini Oluştur (X Metre, Y Metre, Radyan)
-                var visionMeasurementStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev);
+                var visionMeasurementStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, 1000000000);
 
                 // 4. Veriyi ve GÜVEN SKORUNU Swerve şaseye gönder
                 drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);
