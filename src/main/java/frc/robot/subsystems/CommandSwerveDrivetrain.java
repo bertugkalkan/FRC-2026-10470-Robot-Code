@@ -25,6 +25,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.config.PIDConstants;
+
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
  * Subsystem so it can easily be used in command-based projects.
@@ -135,6 +140,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configurePathPlanner();
     }
 
     /**
@@ -160,6 +166,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configurePathPlanner();
     }
 
     /**
@@ -200,6 +207,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configurePathPlanner();
     }
 
     /**
@@ -314,5 +322,38 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             Matrix<N3, N1> visionMeasurementStdDevs) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds),
                 visionMeasurementStdDevs);
+    }
+    // PathPlanner otonom sürüşü için robot merkezli hız isteği (ApplyRobotSpeeds olarak güncellendi)
+    private final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds();
+
+    public void configurePathPlanner() {
+        RobotConfig config;
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return; 
+        }
+
+        AutoBuilder.configure(
+            () -> this.getState().Pose,
+            this::resetPose,
+            () -> this.getState().Speeds,
+            (speeds, feedforwards) -> this.setControl(autoRequest.withSpeeds(speeds)),
+            new PPHolonomicDriveController( // 5. Otonom sürüş PID ayarları
+                new PIDConstants(5.0, 0.0, 0.0), // İleri/Geri ve Sağ/Sol hassasiyeti
+                new PIDConstants(5.0, 0.0, 0.0)  // Dönüş (Pusula) hassasiyeti
+            ),
+            config, // 6. Arayüzden çekilen fiziksel konfigürasyon
+            () -> {
+                // 7. Kırmızı ittifaktaysak rotayı Y ekseninde aynala
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+            },
+            this // 8. Bu subsystem'i otonoma bağla
+        );
     }
 }

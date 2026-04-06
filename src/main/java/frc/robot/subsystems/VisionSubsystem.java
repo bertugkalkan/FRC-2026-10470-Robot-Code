@@ -27,9 +27,9 @@ public class VisionSubsystem extends SubsystemBase {
     private final PhotonCamera cam3 = new PhotonCamera("PhotonCam3");
 
     // Kameraların robotun merkezine göre konumları
-    private final Transform3d robotToCam1 = new Transform3d(new Translation3d(0.2, 0.2, 0.5), new Rotation3d(0, 0, 0));
-    private final Transform3d robotToCam2 = new Transform3d(new Translation3d(-0.2, 0.2, 0.5), new Rotation3d(0, 0, Math.PI)); 
-    private final Transform3d robotToCam3 = new Transform3d(new Translation3d(0.0, -0.2, 0.5), new Rotation3d(0, 0, -Math.PI / 2)); 
+    private final Transform3d robotToCam1 = new Transform3d(new Translation3d(0.306, -0.34, 0.46), new Rotation3d(0, 0, 0));
+    private final Transform3d robotToCam2 = new Transform3d(new Translation3d(-0.105, 0.24, 0.69), new Rotation3d(0, 0, Math.PI)); 
+    private final Transform3d robotToCam3 = new Transform3d(new Translation3d(0.105, 0.245, 0.69), new Rotation3d(0, 0, -Math.PI / 2)); 
 
     // Her kamera için ayrı konum tahminleyicisi
     private final PhotonPoseEstimator estimator1;
